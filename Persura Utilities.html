@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Discord Fonts Builder</title>
+
+  <style>
+    :root{
+      color-scheme: dark light;
+
+      --bg: Canvas;
+      --fg: CanvasText;
+      --border: color-mix(in srgb, CanvasText 25%, transparent);
+      --border-strong: color-mix(in srgb, CanvasText 45%, transparent);
+      --muted: color-mix(in srgb, CanvasText 70%, transparent);
+      --shadow: rgba(0,0,0,.18);
+      --chip: color-mix(in srgb, Canvas 92%, transparent);
+    }
+
+    body{
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      margin:0;
+      padding:24px;
+      max-width:1100px;
+      color: var(--fg);
+      background: var(--bg);
+    }
+
+    .card{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:18px;
+      box-shadow:0 6px 20px color-mix(in srgb, var(--shadow) 60%, transparent);
+      background: color-mix(in srgb, Canvas 96%, transparent);
+    }
+
+    h1{margin:0 0 10px 0;font-size:22px;}
+    h2{margin:18px 0 10px 0;font-size:16px;opacity:.95;}
+
+    .row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px;}
+    .col{display:flex;flex-direction:column;gap:6px;}
+    label{font-size:13px;opacity:.9;}
+
+    select,
+    input[type="text"],
+    textarea{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      outline:none;
+      min-height:40px;
+      font: inherit;
+      caret-color: var(--fg);
+    }
+
+    option{ background: var(--bg); color: var(--fg); }
+
+    select:focus,
+    input[type="text"]:focus,
+    textarea:focus{
+      border-color: var(--border-strong);
+    }
+
+    input[type="text"]{min-width:220px;}
+
+    textarea{
+      width:100%;
+      min-height:92px;
+      resize:vertical;
+      line-height:1.35;
+      font-family:
+        system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+        "Noto Sans", "Noto Sans Symbols2", "Apple Symbols",
+        "Segoe UI Symbol", "Arial Unicode MS", sans-serif;
+    }
+
+    .toggle{
+      display:inline-flex;gap:10px;align-items:center;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      user-select:none;min-height:40px;
+      background: var(--bg);
+      color: var(--fg);
+    }
+    .toggle input{transform:scale(1.15);}
+
+    .btn{
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      cursor:pointer;min-height:40px;white-space:nowrap;
+    }
+    .btn:hover{border-color: var(--border-strong);}
+    .btn:active{transform:translateY(1px);}
+
+    .emojiBtn{display:inline-flex;gap:10px;align-items:center;justify-content:center;min-width:140px;}
+    .emojiPanel{position:relative;}
+
+    .popover{
+      position:absolute;top:46px;left:0;z-index:10;
+      width:360px;max-width:92vw;
+      border-radius:14px;border:1px solid var(--border);
+      background: var(--bg);
+      box-shadow: 0 12px 40px color-mix(in srgb, var(--shadow) 70%, transparent);
+      padding:10px;
+      display:none;
+    }
+
+    /* Emoji picker element styling */
+    emoji-picker{
+      width:100%;
+      height:360px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      overflow:hidden;
+    }
+
+    .outRow{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;}
+    .outRow > *{flex:1;}
+    .outRow .btn{flex:0 0 auto;}
+
+    .status{font-size:12px;color:var(--muted);margin-top:8px;min-height:1.2em;}
+    .hint{margin-top:10px;font-size:12.5px;color:var(--muted);line-height:1.35;}
+    .preview{
+      margin-top:14px;border-radius:14px;border:1px dashed var(--border);
+      padding:14px;white-space:pre-wrap;
+      font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      background: color-mix(in srgb, Canvas 92%, transparent);
+    }
+
+    .inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    .tag{font-size:12px;color:var(--muted);padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--chip);}
+
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media (max-width: 900px){ .grid2{grid-template-columns:1fr;} }
+
+    .listbox{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px;
+      max-height:240px;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      background: color-mix(in srgb, Canvas 92%, transparent);
+    }
+
+    .styleItem{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      cursor:pointer;
+      user-select:none;
+      line-height:1.25;
+      background: var(--bg);
+      color: var(--fg);
+    }
+    .styleItem:hover{border-color: var(--border-strong);}
+    .styleItem.active{border-color: var(--border-strong);}
+
+    .mono{ font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace; }
+  </style>
+
+  <!-- ✅ Real emoji picker (includes search + large emoji set) -->
+  <script type="module">
+    import "https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js";
+  </script>
+</head>
+
+<body>
+  <div class="card">
+    <h1>Discord Fonts Builder</h1>
+
+    <h2>Main Builder</h2>
+    <div class="row">
+      <div class="col">
+        <label for="fontEnum">Font</label>
+        <select id="fontEnum">
+          <option value="math_sans">Math Sans</option>
+          <option value="math_sans_bold">Math Sans Bold</option>
+          <option value="math_serif">Math Serif</option>
+        </select>
+      </div>
+
+      <div class="col emojiPanel">
+        <label>Emoji</label>
+        <button class="btn emojiBtn" id="emojiBtn" type="button">
+          <span id="emojiLabel">🙂</span>
+          <span style="opacity:.75">Pick emoji</span>
+        </button>
+
+        <div class="popover" id="emojiPopover" aria-hidden="true">
+          <emoji-picker id="emojiPickerMain"></emoji-picker>
+          <div class="hint" style="margin-top:8px;">Use the picker search box to find any emoji.</div>
+        </div>
+      </div>
+
+      <div class="col">
+        <label for="dividerEnum">Divider</label>
+        <select id="dividerEnum">
+          <option value="｜">｜</option>
+          <option value="「">「</option>
+          <option value="」">」</option>
+          <option value="・">・</option>
+          <option value="〉">〉</option>
+          <option value="⫶">⫶</option>
+          <option value="︰">︰</option>
+          <option value="custom">Custom…</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+
+      <div class="col" id="dividerCustomWrap" style="display:none; min-width: 260px;">
+        <label>Custom divider</label>
+        <div class="inline">
+          <input id="dividerCustom" type="text" placeholder="Type divider…" />
+          <button class="btn" id="dividerUseCustom" type="button">Use</button>
+        </div>
+        <div class="inline" style="margin-top:6px;">
+          <span class="tag">Quick picks:</span>
+          <button class="btn" type="button" data-div="｜">｜</button>
+          <button class="btn" type="button" data-div="⫶">⫶</button>
+          <button class="btn" type="button" data-div="︰">︰</button>
+          <button class="btn" type="button" data-div="・">・</button>
+          <button class="btn" type="button" data-div="〉">〉</button>
+        </div>
+      </div>
+
+      <div class="col">
+        <label for="spacerEnum">Spacer</label>
+        <select id="spacerEnum">
+          <option value="-">-</option>
+          <option value="⎽">⎽</option>
+          <option value="﹒">﹒</option>
+          <option value="﹎">﹎</option>
+          <option value="．">．</option>
+          <option value="custom">Custom…</option>
+        </select>
+      </div>
+
+      <div class="col" id="spacerCustomWrap" style="display:none; min-width: 260px;">
+        <label>Custom spacer</label>
+        <div class="inline">
+          <input id="spacerCustom" type="text" placeholder="Type spacer…" />
+          <button class="btn" id="spacerUseCustom" type="button">Use</button>
+        </div>
+        <div class="inline" style="margin-top:6px;">
+          <span class="tag">Quick picks:</span>
+          <button class="btn" type="button" data-sp="-">-</button>
+          <button class="btn" type="button" data-sp="⎽">⎽</button>
+          <button class="btn" type="button" data-sp="﹒">﹒</button>
+          <button class="btn" type="button" data-sp="﹎">﹎</button>
+          <button class="btn" type="button" data-sp="．">．</button>
+        </div>
+      </div>
+
+      <label class="toggle" title="ON: convert A–Z and a–z. OFF: convert only A–Z.">
+        <input id="lowercaseToggle" type="checkbox" />
+        Lowercase mode
+      </label>
+    </div>
+
+    <div class="row">
+      <div class="col" style="flex:1; min-width:280px;">
+        <label for="textBox">Input text</label>
+        <input id="textBox" type="text" placeholder="Type your text here..." />
+      </div>
+    </div>
+
+    <div>
+      <label for="outputText">Output (readonly)</label>
+      <div class="outRow" style="margin-top:6px;">
+        <textarea id="outputText" readonly></textarea>
+        <button class="btn" id="copyBtn" type="button">Copy</button>
+      </div>
+      <div class="status" id="copyStatus"></div>
+    </div>
+
+    <div class="hint">
+      Output = <b>EMOJI + DIVIDER + TEXT</b>. Spaces become spacer (spaces removed). Digits → superscripts. & → ＆.
+      Text inside <span class="mono">( )</span> becomes <span class="mono">﹙ ... ﹚</span> and uses your Math Sans alphabet.
+    </div>
+
+    <h2>Category Creator</h2>
+    <div class="grid2">
+      <div>
+        <div class="row" style="margin-bottom:10px;">
+          <div class="col emojiPanel">
+            <label>Category Emoji</label>
+            <button class="btn emojiBtn" id="catEmojiBtn" type="button">
+              <span id="catEmojiLabel">✨</span>
+              <span style="opacity:.75">Pick emoji</span>
+            </button>
+
+            <div class="popover" id="catEmojiPopover" aria-hidden="true">
+              <emoji-picker id="emojiPickerCat"></emoji-picker>
+              <div class="hint" style="margin-top:8px;">Use the picker search box to find any emoji.</div>
+            </div>
+          </div>
+
+          <div class="col" style="flex:1; min-width:280px;">
+            <label for="catText">Category text (auto-uppercase)</label>
+            <input id="catText" type="text" placeholder="e.g. kits" />
+          </div>
+
+          <div class="col" style="min-width:240px;">
+            <label for="catStyle">Category style</label>
+            <select id="catStyle"></select>
+          </div>
+        </div>
+
+        <div>
+          <label for="catOutput">Category output (readonly)</label>
+          <div class="outRow" style="margin-top:6px;">
+            <textarea id="catOutput" readonly></textarea>
+            <button class="btn" id="catCopyBtn" type="button">Copy</button>
+          </div>
+          <div class="status" id="catCopyStatus"></div>
+        </div>
+
+        <div class="hint">
+          Category text is converted to <b>UPPERCASE</b> using the selected font.
+          Styles support <span class="mono">{text}</span> and (if present) <span class="mono">{emoji}</span>.
+        </div>
+      </div>
+
+      <div>
+        <label>Style quick list (click to select)</label>
+        <div class="listbox" id="catStyleList"></div>
+      </div>
+    </div>
+
+    <div class="preview" id="preview"></div>
+  </div>
+
+  <script>
+    const CATEGORY_STYLES = [
+      "─── {text} ───","[ {text} ]","— {text} —",
+      ":: {text} ::",">>> {text} <<<","[:: {text} ::]",
+      "────────── {text} ──────────","──── {text} ────","═════ {text} ═════",
+      "│ {text} │","• {text} •",
+      "✦ {text} ✦","✧ {text} ✧","✺ {text} ✺",
+      "{emoji} {text} {emoji}","⟦ {text} ⟧","▸▸ {text} ◂◂",
+      "~~~~~~ {text} ~~~~~~","───────| {text} |───────",
+      "✧ ⋅⋆ ⏤⏤⫶ {emoji} {text} ⫶⏤ ⋆⋅ ✧",
+      "┏━━━ {emoji} {text} ━━━┓",
+      "╭┄┄┄┄┄┤ • {text} • ├┄┄┄┄┄╮",
+      "┌┄┄┄┄┄┤•  {text}  •├┄┄┄┄┄┐",
+      "╭┄┄┄┄┄┤ • {emoji} {text} {emoji} • ├┄┄┄┄┄╮",
+    ];
+
+    const FontEnum = Object.freeze({
+      MATH_SANS: "math_sans",
+      MATH_SANS_BOLD: "math_sans_bold",
+      MATH_SERIF: "math_serif",
+    });
+
+    const alphabetsRaw = {
+      [FontEnum.MATH_SANS]: {
+        upper: "𝖠𝖡𝖢𝖣𝖤𝖥𝖦𝖧𝖨𝖩𝖪𝖫𝖬𝖭𝖮𝖯𝖰𝖱𝖲𝖳𝖴𝖵𝖶𝖷𝖸𝖹",
+        lower: "𝖺𝖻𝖼𝖽𝖾𝖿𝗀𝗁𝗂𝗃𝗄𝗅𝗆𝗇𝗈𝗉𝗊𝗋𝗌𝗍𝗎𝗏𝗐𝗑𝗒𝗓",
+      },
+      [FontEnum.MATH_SANS_BOLD]: {
+        upper: "𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭",
+        lower: "𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇",
+      },
+      [FontEnum.MATH_SERIF]: {
+        upper: "𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙",
+        lower: "𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳",
+      },
+    };
+
+    const alphabets = Object.fromEntries(
+      Object.entries(alphabetsRaw).map(([k, v]) => [
+        k,
+        { upper: v.upper, lower: v.lower, upperArr: Array.from(v.upper), lowerArr: Array.from(v.lower) },
+      ])
+    );
+
+    const baseUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const baseLower = "abcdefghijklmnopqrstuvwxyz";
+
+    const SUPERSCRIPT_NUM = {"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
+    const SUBS = Object.freeze({ "&": "＆", "(": "﹙", ")": "﹚" });
+
+    // Smalltext alphabet (your Math Sans)
+    const SMALLTEXT_UPPER = Array.from("𝖠𝖡𝖢𝖣𝖤𝖥𝖦𝖧𝖨𝖩𝖪𝖫𝖬𝖭𝖮𝖯𝖰𝖱𝖲𝖳𝖴𝖵𝖶𝖷𝖸𝖹");
+    const SMALLTEXT_LOWER = Array.from("𝖺𝖻𝖼𝖽𝖾𝖿𝗀𝗁𝗂𝗃𝗄𝗅𝗆𝗇𝗈𝗉𝗊𝗋𝗌𝗍𝗎𝗏𝗐𝗑𝗒𝗓");
+
+    // DOM (main)
+    const fontEnumEl = document.getElementById("fontEnum");
+    const dividerEnumEl = document.getElementById("dividerEnum");
+    const spacerEnumEl = document.getElementById("spacerEnum");
+    const dividerCustomWrap = document.getElementById("dividerCustomWrap");
+    const spacerCustomWrap = document.getElementById("spacerCustomWrap");
+    const dividerCustomEl = document.getElementById("dividerCustom");
+    const spacerCustomEl = document.getElementById("spacerCustom");
+    const dividerUseCustomEl = document.getElementById("dividerUseCustom");
+    const spacerUseCustomEl = document.getElementById("spacerUseCustom");
+    const lowercaseToggleEl = document.getElementById("lowercaseToggle");
+    const textBoxEl = document.getElementById("textBox");
+    const outputTextEl = document.getElementById("outputText");
+    const copyBtnEl = document.getElementById("copyBtn");
+    const copyStatusEl = document.getElementById("copyStatus");
+    const previewEl = document.getElementById("preview");
+
+    // Emoji UI (main)
+    const emojiBtn = document.getElementById("emojiBtn");
+    const emojiLabel = document.getElementById("emojiLabel");
+    const emojiPopover = document.getElementById("emojiPopover");
+    const emojiPickerMain = document.getElementById("emojiPickerMain");
+
+    // DOM (category)
+    const catEmojiBtn = document.getElementById("catEmojiBtn");
+    const catEmojiLabel = document.getElementById("catEmojiLabel");
+    const catEmojiPopover = document.getElementById("catEmojiPopover");
+    const emojiPickerCat = document.getElementById("emojiPickerCat");
+
+    const catTextEl = document.getElementById("catText");
+    const catStyleEl = document.getElementById("catStyle");
+    const catStyleListEl = document.getElementById("catStyleList");
+    const catOutputEl = document.getElementById("catOutput");
+    const catCopyBtnEl = document.getElementById("catCopyBtn");
+    const catCopyStatusEl = document.getElementById("catCopyStatus");
+
+    let currentEmoji = "🙂";
+    let currentCatEmoji = "✨";
+
+    function openPopover(pop, open){
+      pop.style.display = open ? "block" : "none";
+      pop.setAttribute("aria-hidden", open ? "false" : "true");
+    }
+
+    function getDividerValue(){
+      const v = dividerEnumEl.value;
+      if (v === "none") return "";
+      if (v === "custom") return (dividerCustomEl.value || "");
+      return v;
+    }
+    function getSpacerValue(){
+      const v = spacerEnumEl.value;
+      if (v === "custom") return (spacerCustomEl.value || "");
+      return v;
+    }
+    function renderCustomInputs(){
+      dividerCustomWrap.style.display = (dividerEnumEl.value === "custom") ? "flex" : "none";
+      spacerCustomWrap.style.display = (spacerEnumEl.value === "custom") ? "flex" : "none";
+    }
+    function wireCustomPickButtons(){
+      dividerCustomWrap.querySelectorAll("button[data-div]").forEach((b) => {
+        b.addEventListener("click", () => {
+          dividerEnumEl.value = "custom";
+          dividerCustomEl.value = b.getAttribute("data-div");
+          renderCustomInputs();
+          renderOutput();
+        });
+      });
+      spacerCustomWrap.querySelectorAll("button[data-sp]").forEach((b) => {
+        b.addEventListener("click", () => {
+          spacerEnumEl.value = "custom";
+          spacerCustomEl.value = b.getAttribute("data-sp");
+          renderCustomInputs();
+          renderOutput();
+        });
+      });
+    }
+    function useDividerCustom(){ dividerEnumEl.value = "custom"; renderCustomInputs(); renderOutput(); }
+    function useSpacerCustom(){ spacerEnumEl.value = "custom"; renderCustomInputs(); renderOutput(); }
+
+    function mapCharMath(ch, fontKey, lowercaseMode){
+      if (SUBS[ch]) return SUBS[ch];
+      if (SUPERSCRIPT_NUM[ch]) return SUPERSCRIPT_NUM[ch];
+
+      const a = alphabets[fontKey];
+
+      const idxU = baseUpper.indexOf(ch);
+      if (idxU !== -1) return a.upperArr[idxU];
+
+      const idxL = baseLower.indexOf(ch);
+      if (idxL !== -1) return lowercaseMode ? a.lowerArr[idxL] : ch;
+
+      return ch;
+    }
+
+    function mapCharSmalltext(ch){
+      if (ch === "&") return "＆";
+      if (SUPERSCRIPT_NUM[ch]) return SUPERSCRIPT_NUM[ch];
+
+      const idxU = baseUpper.indexOf(ch);
+      if (idxU !== -1) return SMALLTEXT_UPPER[idxU];
+
+      const idxL = baseLower.indexOf(ch);
+      if (idxL !== -1) return SMALLTEXT_LOWER[idxL];
+
+      return ch;
+    }
+
+    function convertText(input, fontKey, lowercaseMode, spacer){
+      let out = "";
+      let lastWasSpacer = false;
+      let inSmall = false;
+
+      for (const rawCh of input){
+        if (/\s/.test(rawCh)){
+          if (spacer && !lastWasSpacer){ out += spacer; lastWasSpacer = true; }
+          continue;
+        }
+
+        if (rawCh === "("){ inSmall = true; out += "﹙"; lastWasSpacer = false; continue; }
+        if (rawCh === ")"){ inSmall = false; out += "﹚"; lastWasSpacer = false; continue; }
+
+        out += inSmall ? mapCharSmalltext(rawCh) : mapCharMath(rawCh, fontKey, lowercaseMode);
+        lastWasSpacer = false;
+      }
+      return out;
+    }
+
+    function convertCategoryTextToUpperFont(input, fontKey){
+      const up = (input || "").toUpperCase();
+      const a = alphabets[fontKey];
+      let out = "";
+      for (const ch of up){
+        if (SUPERSCRIPT_NUM[ch]) { out += SUPERSCRIPT_NUM[ch]; continue; }
+        if (ch === "&") { out += "＆"; continue; }
+        const idxU = baseUpper.indexOf(ch);
+        if (idxU !== -1) { out += a.upperArr[idxU]; continue; }
+        out += ch;
+      }
+      return out;
+    }
+
+    function buildCategoryStyleUI(){
+      catStyleEl.innerHTML = "";
+      CATEGORY_STYLES.forEach((s, i) => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = `${i + 1}. ${s.replaceAll("{text}", "TEXT").replaceAll("{emoji}", "EMOJI")}`;
+        catStyleEl.appendChild(opt);
+      });
+
+      catStyleListEl.innerHTML = "";
+      CATEGORY_STYLES.forEach((s) => {
+        const div = document.createElement("div");
+        div.className = "styleItem";
+        div.setAttribute("data-style", s);
+        div.textContent = s.replaceAll("{text}", "TEXT").replaceAll("{emoji}", "EMOJI");
+        div.addEventListener("click", () => { catStyleEl.value = s; renderCategoryCreator(); });
+        catStyleListEl.appendChild(div);
+      });
+    }
+
+    function renderCategoryCreator(){
+      const fontKey = fontEnumEl.value;
+      const style = catStyleEl.value || CATEGORY_STYLES[0];
+
+      // force uppercase in the input box itself
+      const forcedUpper = (catTextEl.value || "").toUpperCase();
+      if (catTextEl.value !== forcedUpper){
+        const pos = catTextEl.selectionStart ?? forcedUpper.length;
+        catTextEl.value = forcedUpper;
+        catTextEl.setSelectionRange(pos, pos);
+      }
+
+      const textStyled = convertCategoryTextToUpperFont(catTextEl.value || "", fontKey);
+      const out = style.replaceAll("{text}", textStyled).replaceAll("{emoji}", currentCatEmoji);
+      catOutputEl.value = out;
+
+      catStyleListEl.querySelectorAll(".styleItem").forEach((el) =>
+        el.classList.toggle("active", el.getAttribute("data-style") === style)
+      );
+    }
+
+    function renderPreview(){
+      const a = alphabets[fontEnumEl.value];
+      previewEl.textContent =
+        `Selected font preview:\n${a.upper}\n${a.lower}\n\n` +
+        `Smalltext (inside ﹙﹚) preview:\n${SMALLTEXT_UPPER.join("")}\n${SMALLTEXT_LOWER.join("")}\n` +
+        `Digits → ⁰¹²³⁴⁵⁶⁷⁸⁹ , & → ＆`;
+    }
+
+    function renderOutput(){
+      const fontKey = fontEnumEl.value;
+      const divider = getDividerValue();
+      const spacer = getSpacerValue();
+      const converted = convertText(textBoxEl.value || "", fontKey, lowercaseToggleEl.checked, spacer);
+      outputTextEl.value = `${currentEmoji}${divider}${converted}`;
+    }
+
+    async function copyAny(textareaEl, statusEl, buttonEl){
+      const val = textareaEl.value || "";
+      if (!val) return;
+
+      if (navigator.clipboard && window.isSecureContext){
+        try{
+          await navigator.clipboard.writeText(val);
+          statusEl.textContent = "Copied!";
+          if (buttonEl) buttonEl.textContent = "Copied ✓";
+          setTimeout(() => { statusEl.textContent = ""; if (buttonEl) buttonEl.textContent = "Copy"; }, 900);
+          return;
+        }catch{}
+      }
+
+      textareaEl.removeAttribute("readonly");
+      textareaEl.focus();
+      textareaEl.select();
+      textareaEl.setSelectionRange(0, textareaEl.value.length);
+      textareaEl.setAttribute("readonly", "");
+
+      try{
+        const ok = document.execCommand("copy");
+        statusEl.textContent = ok ? "Copied!" : "Copy failed";
+        if (buttonEl) buttonEl.textContent = ok ? "Copied ✓" : "Copy";
+      }catch{
+        statusEl.textContent = "Copy blocked by browser";
+      }
+
+      window.getSelection?.().removeAllRanges?.();
+      setTimeout(() => { statusEl.textContent = ""; if (buttonEl) buttonEl.textContent = "Copy"; }, 1000);
+    }
+
+    // ===== Emoji picker wiring (REAL picker) =====
+    function bindEmojiPicker(pickerEl, onPick){
+      // emoji-picker-element fires: "emoji-click"
+      pickerEl.addEventListener("emoji-click", (ev) => {
+        const emoji = ev?.detail?.unicode;
+        if (!emoji) return;
+        onPick(emoji);
+      });
+    }
+
+    // Main emoji picker
+    bindEmojiPicker(emojiPickerMain, (emoji) => {
+      currentEmoji = emoji;
+      emojiLabel.textContent = emoji;
+      renderOutput();
+      openPopover(emojiPopover, false);
+    });
+
+    // Category emoji picker
+    bindEmojiPicker(emojiPickerCat, (emoji) => {
+      currentCatEmoji = emoji;
+      catEmojiLabel.textContent = emoji;
+      renderCategoryCreator();
+      openPopover(catEmojiPopover, false);
+    });
+
+    // Popover open/close
+    emojiBtn.addEventListener("click", () => {
+      const isOpen = emojiPopover.style.display === "block";
+      openPopover(emojiPopover, !isOpen);
+    });
+
+    catEmojiBtn.addEventListener("click", () => {
+      const isOpen = catEmojiPopover.style.display === "block";
+      openPopover(catEmojiPopover, !isOpen);
+    });
+
+    // Close popovers on outside click
+    document.addEventListener("click", (ev) => {
+      const withinMain = emojiBtn.contains(ev.target) || emojiPopover.contains(ev.target);
+      if (!withinMain) openPopover(emojiPopover, false);
+
+      const withinCat = catEmojiBtn.contains(ev.target) || catEmojiPopover.contains(ev.target);
+      if (!withinCat) openPopover(catEmojiPopover, false);
+    });
+
+    // ===== Other events =====
+    fontEnumEl.addEventListener("change", () => { renderPreview(); renderOutput(); renderCategoryCreator(); });
+    lowercaseToggleEl.addEventListener("change", renderOutput);
+    textBoxEl.addEventListener("input", renderOutput);
+
+    dividerEnumEl.addEventListener("change", () => { renderCustomInputs(); renderOutput(); });
+    spacerEnumEl.addEventListener("change", () => { renderCustomInputs(); renderOutput(); });
+    dividerCustomEl.addEventListener("input", () => { if (dividerEnumEl.value === "custom") renderOutput(); });
+    spacerCustomEl.addEventListener("input", () => { if (spacerEnumEl.value === "custom") renderOutput(); });
+    dividerUseCustomEl.addEventListener("click", useDividerCustom);
+    spacerUseCustomEl.addEventListener("click", useSpacerCustom);
+
+    copyBtnEl.addEventListener("click", () => copyAny(outputTextEl, copyStatusEl, copyBtnEl));
+
+    catTextEl.addEventListener("input", renderCategoryCreator);
+    catStyleEl.addEventListener("change", renderCategoryCreator);
+    catCopyBtnEl.addEventListener("click", () => copyAny(catOutputEl, catCopyStatusEl, catCopyBtnEl));
+
+    // Init
+    wireCustomPickButtons();
+    renderCustomInputs();
+
+    buildCategoryStyleUI();
+    catStyleEl.value = CATEGORY_STYLES[0];
+
+    renderPreview();
+    renderOutput();
+    renderCategoryCreator();
+  </script>
+</body>
+</html>
